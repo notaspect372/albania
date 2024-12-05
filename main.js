@@ -1,4 +1,4 @@
-const puppeteer = require('puppeteer-core');
+const puppeteerExtra = require('puppeteer-extra');
 const fs = require('fs');
 const xlsx = require('xlsx');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -134,7 +134,7 @@ async function scrapePropertyData(page, propertyUrl) {
 }
 // Main function to scrape data
 (async () => {
-const browser = await puppeteer.launch({
+  const browser = await puppeteerExtra.launch({
     headless: 'new',
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
     defaultViewport: null,
