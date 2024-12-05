@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer-core');
+const fs = require('fs');
 const xlsx = require('xlsx');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -183,13 +184,25 @@ async function scrapePropertyData(page, propertyUrl) {
         }
 
         // Save the data to an Excel file
+ if (!fs.existsSync('output')) {
+            fs.mkdirSync('output');
+        }
+
+        const outputDirectory = 'output/';
         const baseFilename = baseUrl.replace("https://", "").replace(/\//g, "_") + ".xlsx";
+        const filePath = outputDirectory + baseFilename;
         const wb = xlsx.utils.book_new();
         const ws = xlsx.utils.json_to_sheet(scrapedData);
         xlsx.utils.book_append_sheet(wb, ws, "Properties");
-        xlsx.writeFile(wb, baseFilename);
-        console.log(`Data saved to ${baseFilename}`);
+        xlsx.writeFile(wb, filePath);
+
+        if (fs.existsSync(filePath)) {
+            console.log(`File successfully created at ${filePath}`);
+        } else {
+            console.error(`Failed to create file at ${filePath}`);
+        }
     }
+
 
     await browser.close();
 })();
