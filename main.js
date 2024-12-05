@@ -33,7 +33,7 @@ async function getLatLongFromAddress(address) {
 
 // Base URLs to scrape
 const baseUrls = [
-    "https://www.merrjep.al/njoftime/imobiliare-vendbanime/toke-fusha-farma/ne-shitje/berat"
+    "https://www.merrjep.al/njoftime/imobiliare-vendbanime/cimer-cimere/me-qera"
     // Add more URLs here
 ];
 
@@ -134,12 +134,11 @@ async function scrapePropertyData(page, propertyUrl) {
 }
 // Main function to scrape data
 (async () => {
-    const browser = await puppeteer.launch({
-        headless: false,
-        executablePath: 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',  // Change the path if necessary
-        defaultViewport: null,  // Disable the default viewport size
-        args: ['--start-maximized']  // Start the browser maximized
-    });
+const browser = await puppeteer.launch({
+    headless: 'new',
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    defaultViewport: null,
+});
 
     const page = await browser.newPage();
 
