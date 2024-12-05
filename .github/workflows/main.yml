@@ -1,0 +1,34 @@
+name: Puppeteer Scraper
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-scraper:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Create output directory
+      run: mkdir -p output
+
+    - name: Run Puppeteer scraper
+      run: node main.js
+      env:
+        PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
+
+    - name: Upload Excel output
+      uses: actions/upload-artifact@v3
+      with:
+        name: Albania
+        path: 'output/*.xlsx'
