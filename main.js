@@ -1,4 +1,4 @@
-const puppeteerExtra = require('puppeteer-extra');
+const puppeteer = require('puppeteer-core');
 const fs = require('fs');
 const xlsx = require('xlsx');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -33,17 +33,22 @@ async function getLatLongFromAddress(address) {
 
 // Base URLs to scrape
 const baseUrls = [
-    "https://www.merrjep.al/njoftime/imobiliare-vendbanime/objekte-te-huaja/me-qera"
+    "https://www.merrjep.al/njoftime/imobiliare-vendbanime/toke-fusha-farma/ne-shitje/berat"
     // Add more URLs here
 ];
 
 // Function to scrape property URLs from a specific page
 async function scrapePropertyUrls(page, paginatedUrl) {
     try {
-        await page.goto(paginatedUrl, { waitUntil: 'networkidle2', timeout: 60000 });
-        const propertyUrls = await page.$$eval('a.span2-ad-img-list', links => {
-            return links.map(link => link.href);
-        });
+        await page.goto(paginatedUrl, { waitUntil: 'networkidle2', timeout: 0 });
+
+        await page.waitForSelector('a.span2-ad-img-list');
+
+        // Extract the property URLs
+        const propertyUrls = await page.$$eval('a.span2-ad-img-list', links =>
+            links.map(link => link.href)
+        );
+
         return propertyUrls;
     } catch (error) {
         console.error(`Error scraping property URLs on page: ${paginatedUrl}`, error);
@@ -134,38 +139,31 @@ async function scrapePropertyData(page, propertyUrl) {
 }
 // Main function to scrape data
 (async () => {
-  const browser = await puppeteerExtra.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    defaultViewport: null,
-});
+    const browser = await puppeteer.launch({
+        headless: false,
+        executablePath: 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',  // Change the path if necessary
+        defaultViewport: null,  // Disable the default viewport size
+        args: ['--start-maximized']  // Start the browser maximized
+    });
 
     const page = await browser.newPage();
 
     for (let baseUrl of baseUrls) {
         console.log(`Scraping data from base URL: ${baseUrl}`);
 
-        const allPropertyUrls = new Set();
+        const allPropertyUrls = [];
         let pageNum = 1;
-        let foundDuplicate = false;
 
-        // Scrape property URLs incrementally, stop if a duplicate is found
-        while (!foundDuplicate) {
             const paginatedUrl = `${baseUrl}?Page=${pageNum}`;
             console.log(`Scraping page ${pageNum}: ${paginatedUrl}`);
             const pageUrls = await scrapePropertyUrls(page, paginatedUrl);
 
             for (let url of pageUrls) {
-                if (allPropertyUrls.has(url)) {
-                    foundDuplicate = true;
-                    break;
-                }
-                allPropertyUrls.add(url);
+         
+                allPropertyUrls.push(url);
             }
-            if (!foundDuplicate) pageNum++;
-        }
-
-        console.log(`Total unique property URLs found: ${allPropertyUrls.size}`);
+        
+            console.log(`Total unique property URLs found: ${allPropertyUrls.length}`);
 
         const scrapedData = [];
 
@@ -183,7 +181,7 @@ async function scrapePropertyData(page, propertyUrl) {
         }
 
         // Save the data to an Excel file
- if (!fs.existsSync('output')) {
+        if (!fs.existsSync('output')) {
             fs.mkdirSync('output');
         }
 
