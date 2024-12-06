@@ -1,4 +1,4 @@
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer-extra');
 const fs = require('fs');
 const xlsx = require('xlsx');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -139,12 +139,12 @@ async function scrapePropertyData(page, propertyUrl) {
 }
 // Main function to scrape data
 (async () => {
-    const browser = await puppeteer.launch({
-        headless: false,
-        executablePath: 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',  // Change the path if necessary
-        defaultViewport: null,  // Disable the default viewport size
-        args: ['--start-maximized']  // Start the browser maximized
-    });
+ const browser = await puppeteer.launch({
+    headless: 'new',
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    protocolTimeout: 120000, // Increase timeout to 2 minutes
+});
+
 
     const page = await browser.newPage();
 
