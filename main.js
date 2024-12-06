@@ -33,7 +33,7 @@ async function getLatLongFromAddress(address) {
 
 // Base URLs to scrape
 const baseUrls = [
-    "https://www.merrjep.al/njoftime/imobiliare-vendbanime/cimer-cimere/me-qera"
+    "https://www.merrjep.al/njoftime/imobiliare-vendbanime/objekte-te-huaja/me-qera"
     // Add more URLs here
 ];
 
