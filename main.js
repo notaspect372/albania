@@ -151,32 +151,46 @@ async function scrapePropertyData(page, propertyUrl) {
     for (let baseUrl of baseUrls) {
         console.log(`Scraping data from base URL: ${baseUrl}`);
 
-        const allPropertyUrls = [];
+        const allPropertyUrls = new Set(); // Use a Set to track unique URLs
         let pageNum = 1;
+        let hasDuplicates = false;
 
+        while (!hasDuplicates) {
             const paginatedUrl = `${baseUrl}?Page=${pageNum}`;
             console.log(`Scraping page ${pageNum}: ${paginatedUrl}`);
+
             const pageUrls = await scrapePropertyUrls(page, paginatedUrl);
 
-            for (let url of pageUrls) {
-         
-                allPropertyUrls.push(url);
+            if (pageUrls.length === 0) {
+                console.log(`No more property URLs found on page ${pageNum}. Stopping pagination.`);
+                break;
             }
-        
-            console.log(`Total unique property URLs found: ${allPropertyUrls.length}`);
+
+            // Check for duplicates
+            for (let url of pageUrls) {
+                if (allPropertyUrls.has(url)) {
+                    hasDuplicates = true;
+                    console.log(`Duplicate property URL detected: ${url}. Stopping pagination.`);
+                    break;
+                }
+                allPropertyUrls.add(url);
+            }
+
+            if (!hasDuplicates) {
+                pageNum++;
+            }
+        }
+
+        console.log(`Total unique property URLs found: ${allPropertyUrls.size}`);
 
         const scrapedData = [];
-
 
         // Scrape data from each property URL
         for (let propertyUrl of allPropertyUrls) {
             console.log(`Scraping property: ${propertyUrl}`);
             const propertyData = await scrapePropertyData(page, propertyUrl);
-            console.log(propertyData)
             if (propertyData) {
-                console.log(propertyData)
                 scrapedData.push(propertyData);
-
             }
         }
 
